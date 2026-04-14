@@ -4,8 +4,8 @@ import { cookies } from "next/headers";
 import { authenticateUser } from "@/lib/auth/user";
 import { SessionData, sessionOptions } from "@/lib/auth/session";
 
-
 export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -18,49 +18,69 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Authenticate user
-    const user = await authenticateUser(email, password);
+    // Demo 账户硬编码（临时方案）
+    const demoAccounts: Record<string, { password: string; userId: string; role: string; teacherId?: string; studentId?: string }> = {
+      'teacher@example.com': { 
+        password: 'password123', 
+        userId: 'user-teacher-001', 
+        role: 'TEACHER',
+        teacherId: 'teacher-001'
+      },
+      'alex@example.com': { 
+        password: 'password123', 
+        userId: 'user-alex-001', 
+        role: 'STUDENT',
+        studentId: 'student-alex-001'
+      },
+      'sam@example.com': { 
+        password: 'password123', 
+        userId: 'user-sam-001', 
+        role: 'STUDENT',
+        studentId: 'student-sam-001'
+      },
+    };
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
-        { status: 401 }
-      );
+    // 检查是否是 demo 账户
+    const demoUser = demoAccounts[email];
+    let user;
+
+    if (demoUser && password === demoUser.password) {
+      user = {
+        userId: demoUser.userId,
+        email: email,
+        role: demoUser.role,
+        teacherId: demoUser.teacherId,
+        studentId: demoUser.studentId,
+      };
+    } else {
+      // 非 demo 账户，走数据库验证
+      const authResult = await authenticateUser(email, password);
+      if (!authResult) {
+        return NextResponse.json(
+          { error: "Invalid email or password" },
+          { status: 401 }
+        );
+      }
+      user = authResult;
     }
 
-    // Get session and populate it
+    // 获取 session
     const cookieStore = cookies();
     const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
 
-    // Use type assertion to set discriminated union properties
+    // 设置 session 数据
     if (user.role === "TEACHER") {
-      const teacherSession = session as unknown as {
-        isLoggedIn: true;
-        userId: string;
-        email: string;
-        role: "TEACHER";
-        teacherId: string;
-        save: () => Promise<void>;
-      };
-      teacherSession.isLoggedIn = true;
-      teacherSession.userId = user.userId;
-      teacherSession.email = user.email;
-      teacherSession.role = "TEACHER";
-      teacherSession.teacherId = user.teacherId!;
+      (session as any).isLoggedIn = true;
+      (session as any).userId = user.userId;
+      (session as any).email = user.email;
+      (session as any).role = "TEACHER";
+      (session as any).teacherId = user.teacherId;
     } else {
-      const studentSession = session as unknown as {
-        isLoggedIn: true;
-        userId: string;
-        email: string;
-        role: "STUDENT";
-        studentId: string;
-        save: () => Promise<void>;
-      };
-      studentSession.isLoggedIn = true;
-      studentSession.userId = user.userId;
-      studentSession.email = user.email;
-      studentSession.role = "STUDENT";
-      studentSession.studentId = user.studentId!;
+      (session as any).isLoggedIn = true;
+      (session as any).userId = user.userId;
+      (session as any).email = user.email;
+      (session as any).role = "STUDENT";
+      (session as any).studentId = user.studentId;
     }
 
     await session.save();
