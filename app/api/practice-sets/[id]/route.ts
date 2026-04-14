@@ -108,7 +108,8 @@ export async function GET(
     }
 
     // Build lookup map to preserve order
-    const sampleItemMap = new Map(sampleItems.map((item) => [item.id, item]));
+   
+const sampleItemMap = new Map(sampleItems.map((item: any) => [item.id, item]));
 
     const questions: Question[] = sampleItemIds.map((sampleItemId) => {
       const item = sampleItemMap.get(sampleItemId)!;
