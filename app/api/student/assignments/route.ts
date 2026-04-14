@@ -56,7 +56,7 @@ export async function GET() {
     });
 
     // Transform to response shape with full practice set data
-    const responseAssignments = assignments.map((assignment) => {
+    const responseAssignments = assignments.map((assignment: any) => {
       // Parse questions JSON to get questionIds array
       let questionIds: string[] = [];
       try {
