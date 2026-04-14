@@ -3,18 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
-import { Checkbox } from "@/components/ui/Checkbox";
-import { Badge } from "@/components/ui/Badge";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/Select";
-import { Calendar } from "@/components/ui/Calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card"; // 使用你的自定义 Card
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { 
   Calendar as CalendarIcon, 
@@ -22,9 +12,135 @@ import {
   CheckCircle2, 
   BookOpen, 
   Users,
-  Loader2
+  Loader2,
+  Check,
+  ChevronDown
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+// 临时简单的 Checkbox 组件（如果没有的话）
+const Checkbox = ({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: () => void }) => (
+  <div 
+    onClick={onCheckedChange}
+    className={cn(
+      "h-4 w-4 rounded border cursor-pointer flex items-center justify-center transition-colors",
+      checked 
+        ? "bg-blue-500 border-blue-500 text-white" 
+        : "border-gray-300 hover:border-gray-400 bg-white"
+    )}
+  >
+    {checked && <Check className="w-3 h-3" />}
+  </div>
+);
+
+// 临时简单的 Badge 组件
+const Badge = ({ children, variant = "default" }: { children: React.ReactNode; variant?: "default" | "secondary" | "outline" }) => {
+  const variantStyles = {
+    default: "bg-blue-100 text-blue-800",
+    secondary: "bg-gray-100 text-gray-800",
+    outline: "border border-gray-300 text-gray-700"
+  };
+  return (
+    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium", variantStyles[variant])}>
+      {children}
+    </span>
+  );
+};
+
+// 临时简单的 Select 组件
+const SimpleSelect = ({ 
+  value, 
+  onChange, 
+  options, 
+  placeholder 
+}: { 
+  value: string; 
+  onChange: (value: string) => void; 
+  options: { value: string; label: string }[];
+  placeholder?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const selected = options.find(o => o.value === value);
+  
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <span className={selected ? "text-gray-900" : "text-gray-500"}>
+          {selected?.label || placeholder || "Select..."}
+        </span>
+        <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform", open && "rotate-180")} />
+      </button>
+      
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+            {options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "w-full px-3 py-2 text-left text-sm hover:bg-gray-50",
+                  value === option.value && "bg-blue-50 text-blue-700"
+                )}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// 临时简单的 Calendar/DatePicker
+const DatePicker = ({ date, onChange }: { date?: Date; onChange: (date?: Date) => void }) => {
+  const [open, setOpen] = useState(false);
+  
+  // 简单的日期输入作为替代
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm hover:border-gray-400"
+      >
+        <CalendarIcon className="w-4 h-4 text-gray-500" />
+        <span className={date ? "text-gray-900" : "text-gray-500"}>
+          {date ? format(date, "PPP") : "Set due date (optional)"}
+        </span>
+      </button>
+      
+      {open && (
+        <div className="absolute z-20 mt-1 p-3 bg-white border border-gray-200 rounded-lg shadow-lg">
+          <input
+            type="date"
+            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            onChange={(e) => {
+              const d = e.target.value ? new Date(e.target.value) : undefined;
+              onChange(d);
+              setOpen(false);
+            }}
+          />
+        </div>
+      )}
+      
+      {date && (
+        <button 
+          onClick={() => onChange(undefined)}
+          className="ml-2 text-sm text-gray-500 hover:text-gray-700"
+        >
+          Clear
+        </button>
+      )}
+    </div>
+  );
+};
 
 // 类型定义
 interface Student {
@@ -69,7 +185,6 @@ export default function AssignmentsPage() {
       try {
         setLoading(true);
         
-        // 并行获取学生、练习集和主题
         const [studentsRes, practiceSetsRes] = await Promise.all([
           fetch("/api/teacher/students"),
           fetch("/api/teacher/practice-sets"),
@@ -141,44 +256,19 @@ export default function AssignmentsPage() {
   };
 
   // 提交分配
- const handleAssign = async () => {
-  if (selectedStudents.size === 0 || selectedPracticeSets.size === 0) {
-    setError("Please select at least one student and one practice set");
-    return;
-  }
-
-  setSubmitting(true);
-  setError("");
-
-  try {
-    const response = await fetch("/api/teacher/assignments/batch", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        studentIds: Array.from(selectedStudents),
-        practiceSetIds: Array.from(selectedPracticeSets),
-        dueDate: dueDate?.toISOString(),
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || "Failed to create assignments");
+  const handleAssign = async () => {
+    if (selectedStudents.size === 0 || selectedPracticeSets.size === 0) {
+      setError("Please select at least one student and one practice set");
+      return;
     }
 
-    const result = await response.json();
-    
-    // 显示成功消息或跳转
-    router.push("/teacher");
-    router.refresh();
-    
-  } catch (err) {
-    setError(err instanceof Error ? err.message : "Failed to create assignments");
-    setSubmitting(false);
-  }
-};
+    setSubmitting(true);
+    setError("");
+
+    try {
+      // 使用单个分配 API
+      const assignments = [];
       
-      // 为每个学生的每个练习集创建分配
       for (const studentId of selectedStudents) {
         for (const practiceSetId of selectedPracticeSets) {
           assignments.push(
@@ -202,7 +292,6 @@ export default function AssignmentsPage() {
         throw new Error(`Failed to create ${failed.length} assignments`);
       }
 
-      // 成功，跳转到教师页面
       router.push("/teacher");
       router.refresh();
       
@@ -230,7 +319,7 @@ export default function AssignmentsPage() {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => router.push("/teacher")}
               className="flex items-center gap-2"
@@ -252,26 +341,26 @@ export default function AssignmentsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* 左侧：学生选择 */}
-          <Card className="bg-white shadow-sm">
-            <CardHeader className="border-b border-gray-100">
+          <Card variant="elevated" padding="none">
+            <div className="p-6 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-blue-500" />
-                  <CardTitle className="text-lg">Select Students</CardTitle>
+                  <h2 className="text-lg font-semibold">Select Students</h2>
                 </div>
                 <Badge variant="secondary">
                   {selectedStudents.size} selected
                 </Badge>
               </div>
-            </CardHeader>
-            <CardContent className="p-4">
+            </div>
+            
+            <div className="p-4">
               <div className="mb-4 flex items-center gap-2">
                 <Checkbox
-                  id="select-all-students"
                   checked={selectedStudents.size === students.length && students.length > 0}
                   onCheckedChange={toggleAllStudents}
                 />
-                <label htmlFor="select-all-students" className="text-sm font-medium cursor-pointer">
+                <label className="text-sm font-medium cursor-pointer">
                   Select All Students
                 </label>
               </div>
@@ -287,7 +376,7 @@ export default function AssignmentsPage() {
                         "flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer",
                         selectedStudents.has(student.id)
                           ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
                       )}
                       onClick={() => toggleStudent(student.id)}
                     >
@@ -303,46 +392,43 @@ export default function AssignmentsPage() {
                           {student.email}
                         </p>
                       </div>
-                      <Badge variant="outline" className="shrink-0">
+                      <Badge variant="outline">
                         {student.assignmentCount} assignments
                       </Badge>
                     </div>
                   ))
                 )}
               </div>
-            </CardContent>
+            </div>
           </Card>
 
           {/* 右侧：练习集选择 */}
-          <Card className="bg-white shadow-sm">
-            <CardHeader className="border-b border-gray-100">
+          <Card variant="elevated" padding="none">
+            <div className="p-6 border-b border-gray-100">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <BookOpen className="w-5 h-5 text-green-500" />
-                  <CardTitle className="text-lg">Select Practice Sets</CardTitle>
+                  <h2 className="text-lg font-semibold">Select Practice Sets</h2>
                 </div>
                 <Badge variant="secondary">
                   {selectedPracticeSets.size} selected
                 </Badge>
               </div>
-            </CardHeader>
-            <CardContent className="p-4">
+            </div>
+            
+            <div className="p-4">
               {/* 主题过滤 */}
               {topics.length > 0 && (
                 <div className="mb-4">
-                  <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Filter by topic..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">All Topics</SelectItem>
-                      {topics.map((topic) => (
-                        <SelectItem key={topic.id} value={topic.name}>
-                          {topic.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <SimpleSelect
+                    value={selectedTopic}
+                    onChange={setSelectedTopic}
+                    placeholder="Filter by topic..."
+                    options={[
+                      { value: "", label: "All Topics" },
+                      ...topics.map(t => ({ value: t.name, label: t.name }))
+                    ]}
+                  />
                 </div>
               )}
 
@@ -357,7 +443,7 @@ export default function AssignmentsPage() {
                         "flex items-center gap-3 p-3 rounded-lg border transition-colors cursor-pointer",
                         selectedPracticeSets.has(set.id)
                           ? "border-green-500 bg-green-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          : "border-gray-200 hover:border-gray-300 bg-white"
                       )}
                       onClick={() => togglePracticeSet(set.id)}
                     >
@@ -370,7 +456,7 @@ export default function AssignmentsPage() {
                           {set.title}
                         </p>
                         {set.topicName && (
-                          <Badge variant="secondary" className="mt-1 text-xs">
+                          <Badge variant="secondary">
                             {set.topicName}
                           </Badge>
                         )}
@@ -379,48 +465,15 @@ export default function AssignmentsPage() {
                   ))
                 )}
               </div>
-            </CardContent>
+            </div>
           </Card>
         </div>
 
         {/* 底部：截止日期和提交 */}
-        <Card className="mt-6 bg-white shadow-sm">
-          <CardContent className="p-6">
+        <Card variant="elevated" className="mt-6">
+          <div className="p-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "justify-start text-left font-normal",
-                        !dueDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dueDate ? format(dueDate, "PPP") : "Set due date (optional)"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={dueDate}
-                      onSelect={setDueDate}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                
-                {dueDate && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setDueDate(undefined)}
-                  >
-                    Clear
-                  </Button>
-                )}
-              </div>
+              <DatePicker date={dueDate} onChange={setDueDate} />
 
               <div className="flex items-center gap-4">
                 <div className="text-sm text-gray-600">
@@ -435,17 +488,16 @@ export default function AssignmentsPage() {
                   practice sets
                   {selectedStudents.size > 0 && selectedPracticeSets.size > 0 && (
                     <span className="text-gray-500">
-                      {" "}
-                      ({selectedStudents.size * selectedPracticeSets.size} total assignments)
+                      {" "}({selectedStudents.size * selectedPracticeSets.size} total)
                     </span>
                   )}
                 </div>
                 
                 <Button
-                  size="lg"
+                  size="md"
                   onClick={handleAssign}
                   disabled={submitting || selectedStudents.size === 0 || selectedPracticeSets.size === 0}
-                  className="min-w-[140px]"
+                  className="min-w-[120px]"
                 >
                   {submitting ? (
                     <>
@@ -461,7 +513,7 @@ export default function AssignmentsPage() {
                 </Button>
               </div>
             </div>
-          </CardContent>
+          </div>
         </Card>
       </div>
     </main>
