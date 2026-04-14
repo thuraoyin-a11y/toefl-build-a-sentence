@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Apple Design System - Global Reset */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: #f5f5f7;
+  color: #1d1d1f;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+  font-size: 17px;
+}
+
+/* Apple Design System - Typography Classes */
+@layer components {
+  /* Display typography - 20px and above uses SF Pro Display */
+  .apple-display-hero {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 56px;
+    font-weight: 600;
+    line-height: 1.07;
+    letter-spacing: -0.28px;
+  }
+  
+  .apple-display-section {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.10;
+    letter-spacing: 0;
+  }
+  
+  .apple-display-tile {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.14;
+    letter-spacing: 0.196px;
+  }
+  
+  .apple-display-card {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.19;
+    letter-spacing: 0.231px;
+  }
+  
+  .apple-display-sub {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1.19;
+    letter-spacing: 0.231px;
+  }
+  
+  /* Body typography - below 20px uses SF Pro Text */
+  .apple-nav-heading {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
+  }
+  
+  .apple-nav-sub {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 24px;
+    font-weight: 300;
+    line-height: 1.50;
+    letter-spacing: 0;
+  }
+  
+  .apple-body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.47;
+    letter-spacing: -0.374px;
+  }
+  
+  .apple-body-emphasis {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.24;
+    letter-spacing: -0.374px;
+  }
+  
+  .apple-link {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.43;
+    letter-spacing: -0.224px;
+    color: #0066cc;
+  }
+  
+  .apple-link:hover {
+    text-decoration: underline;
+  }
+  
+  .apple-caption {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.29;
+    letter-spacing: -0.224px;
+  }
+  
+  .apple-caption-bold {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.29;
+    letter-spacing: -0.224px;
+  }
+  
+  .apple-micro {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.33;
+    letter-spacing: -0.12px;
+  }
+  
+  .apple-micro-bold {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.33;
+    letter-spacing: -0.12px;
+  }
+  
+  .apple-nano {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.47;
+    letter-spacing: -0.08px;
+  }
+  
+  /* Apple Design System - Button Typography */
+  .apple-button-lg {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1.00;
+    letter-spacing: 0;
+  }
+  
+  .apple-button {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 2.41;
+    letter-spacing: 0;
+  }
+  
+  /* Apple Design System - Navigation Glass Effect */
+  .apple-nav-glass {
+    background-color: rgba(0, 113, 227, 0.85);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+  }
+  
+  /* Apple Design System - Card Shadow */
+  .apple-card-shadow {
+    box-shadow: rgba(0, 113, 227, 0.15) 3px 5px 30px 0px;
+  }
+  
+  /* Apple Design System - Pill Link */
+  .apple-pill {
+    border-radius: 980px;
+  }
+  
+  /* Apple Design System - Section backgrounds */
+  .apple-section-light {
+    background-color: #f5f5f7;
+  }
+  
+  .apple-section-dark {
+    background-color: #0071e3;
+    color: #ffffff;
+  }
+  
+  /* Apple Design System - Primary CTA */
+  .apple-cta-primary {
+    background-color: #0071e3;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 8px 15px;
+    border: 1px solid transparent;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 2.41;
+    letter-spacing: 0;
+    transition: all 0.2s ease;
+  }
+  
+  .apple-cta-primary:hover {
+    background-color: #0077ed;
+  }
+  
+  /* Apple Design System - Secondary CTA */
+  .apple-cta-secondary {
+    background-color: #1d1d1f;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 8px 15px;
+    border: 1px solid transparent;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 2.41;
+    letter-spacing: 0;
+    transition: all 0.2s ease;
+  }
+  
+  /* Apple Design System - Pill Link CTA */
+  .apple-cta-pill {
+    background-color: transparent;
+    color: #0066cc;
+    border-radius: 980px;
+    border: 1px solid #0066cc;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.43;
+    letter-spacing: -0.224px;
+    transition: all 0.2s ease;
+  }
+  
+  .apple-cta-pill:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Smooth transitions for interactive elements */
+button,
+a {
+  transition: all 0.2s ease;
+}
+
+/* Focus styles - Apple Blue */
+:focus-visible {
+  outline: 2px solid #0071e3;
+  outline-offset: 2px;
+}
+
+/* Selection color - Apple Blue with 20% opacity */
+::selection {
+  background-color: rgba(0, 113, 227, 0.2);
+}
+
+/* Input styles */
+input, textarea, select {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+}
+
+/* Focus styles for inputs */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #0071e3;
+  box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.2);
+}

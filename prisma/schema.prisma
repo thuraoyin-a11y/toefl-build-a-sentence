@@ -1,0 +1,177 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String?
+  role         UserRole
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  teacher Teacher?
+  student Student?
+}
+
+enum UserRole {
+  TEACHER
+  STUDENT
+}
+
+model Teacher {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students     Student[]
+  assignments  Assignment[]
+  topics       Topic[]
+  sampleItems  SampleItem[]
+  practiceSets PracticeSet[]
+}
+
+model Student {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  teacherId    String
+  dailyGoal    Int      @default(10)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teacher  Teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  assignments Assignment[]
+  attempts   PracticeAttempt[]
+}
+
+model PracticeSet {
+  id          String   @id @default(uuid())
+  teacherId   String
+  title       String
+  description String?
+  questions   String   // JSON array of SampleItem IDs
+  difficulty  String   // easy, medium, hard
+  topicId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher     Teacher       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  topic       Topic?        @relation(fields: [topicId], references: [id])
+  assignments Assignment[]
+  attempts    PracticeAttempt[]
+
+  @@index([teacherId])
+  @@index([topicId])
+}
+
+model Topic {
+  id          String   @id @default(uuid())
+  teacherId   String
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher      Teacher       @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  practiceSets PracticeSet[]
+  sampleItems  SampleItem[]
+
+  @@index([teacherId, sortOrder])
+}
+
+model SampleItem {
+  id              String   @id @default(uuid())
+  teacherId       String
+  topicId         String?
+  
+  // Content fields
+  title           String
+  context         String
+  wordBank        String   // JSON: string[]
+  correctAnswer   String   // JSON: string[]
+  hint            String?
+  explanation     String?
+  
+  // Self-review status
+  isSelfReviewed  Boolean  @default(false)
+  selfReviewedAt  DateTime?
+  
+  // Standard fields
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  // Relations
+  teacher         Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  topic           Topic?   @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  
+  @@index([teacherId, isSelfReviewed])
+  @@index([teacherId, createdAt])
+  @@index([topicId])
+}
+
+model Assignment {
+  id            String   @id @default(uuid())
+  teacherId     String
+  studentId     String
+  practiceSetId String
+  assignedAt    DateTime @default(now())
+  dueDate       DateTime?
+  completed     Boolean  @default(false)
+
+  teacher     Teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  practiceSet PracticeSet  @relation(fields: [practiceSetId], references: [id], onDelete: Cascade)
+  attempts    PracticeAttempt[]
+
+  @@index([studentId, assignedAt])
+  @@index([teacherId, assignedAt])
+}
+
+model PracticeAttempt {
+  id              String    @id @default(uuid())
+  studentId       String
+  practiceSetId   String
+  assignmentId    String?
+  attemptType     AttemptType
+  sourceAttemptId String?   // For retry attempts: links to the original full attempt
+  
+  // Results
+  score           Int
+  correctCount    Int
+  totalQuestions  Int
+  answers         String    // JSON: { questionId: { selectedWords: string[], isCorrect: boolean, timeSpent: number } }
+  wrongItems      String    // JSON: Question[] - items answered incorrectly
+  
+  // Timestamps
+  startedAt       DateTime  @default(now())
+  completedAt     DateTime?
+  
+  student       Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  practiceSet   PracticeSet  @relation(fields: [practiceSetId], references: [id], onDelete: Cascade)
+  assignment    Assignment?  @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  sourceAttempt PracticeAttempt?  @relation("RetryChain", fields: [sourceAttemptId], references: [id])
+  retryAttempts PracticeAttempt[] @relation("RetryChain")
+
+  @@index([studentId, completedAt])
+  @@index([practiceSetId, completedAt])
+}
+
+enum AttemptType {
+  full_attempt
+  retry_attempt
+}
