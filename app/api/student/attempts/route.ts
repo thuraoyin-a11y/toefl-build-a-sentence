@@ -289,7 +289,7 @@ export async function POST(request: NextRequest) {
               explanation: true,
             },
           });
-          wrongItems = sampleItems.map(item => ({
+          wrongItems = sampleItems.map((item: any) => ({
             id: item.id,
             title: item.title,
             context: item.context,
