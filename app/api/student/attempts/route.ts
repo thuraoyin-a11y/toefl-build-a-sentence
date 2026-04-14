@@ -3,7 +3,6 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { SessionData, sessionOptions } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
-import { AttemptType } from "@prisma/client";
 
 /**
  * GET /api/student/attempts
@@ -312,7 +311,7 @@ export async function POST(request: NextRequest) {
         studentId: student.id,
         practiceSetId,
         assignmentId: assignmentId || null,
-        attemptType: attemptType as AttemptType,
+        attemptType: attemptType as any,
         score,
         correctCount,
         totalQuestions,
