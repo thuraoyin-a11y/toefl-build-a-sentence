@@ -44,25 +44,25 @@ export function Navbar({ className }: { className?: string }) {
   }, [isMenuOpen]);
 
   // Handle logout
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
+  // 在 Navbar.tsx 的 handleLogout 函数中
+const handleLogout = async () => {
+  try {
+    const response = await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-      if (response.ok) {
-        clearUser(); // Clear user from store
-        setIsMenuOpen(false);
-        router.push('/login');
-        router.refresh();
-      } else {
-        console.error('Logout failed');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
+    if (response.ok) {
+      clearUser(); // 清除状态
+      setIsMenuOpen(false);
+      
+      // 使用 window.location 强制刷新跳转（更可靠）
+      window.location.href = '/login';
     }
-  };
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+};
 
   // Determine home link based on user role
   const homeLink = currentUser?.role === "teacher" ? "/teacher" : "/";
