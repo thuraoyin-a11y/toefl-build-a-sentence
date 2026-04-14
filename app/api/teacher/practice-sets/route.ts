@@ -211,3 +211,45 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+export async function GET() {
+  try {
+    const cookieStore = cookies();
+    const session = await getIronSession<SessionData>(
+      cookieStore,
+      sessionOptions
+    );
+
+    if (!session.isLoggedIn || session.role !== "TEACHER") {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 403 }
+      );
+    }
+
+    const practiceSets = await prisma.practiceSet.findMany({
+      where: { teacherId: session.teacherId },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        difficulty: true,
+        createdAt: true,
+        topic: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ practiceSets });
+  } catch (error) {
+    console.error("Error fetching practice sets:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
