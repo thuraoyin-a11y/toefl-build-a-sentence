@@ -3,7 +3,7 @@
 import TeacherConfigClient from "./components/TeacherConfigClient";
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
-import { Users, BookOpen } from "lucide-react";
+import { Users, BookOpen, ClipboardList } from "lucide-react";  // 添加 ClipboardList
 import { TeacherConfig } from "@/lib/types";
 
 // Default config - will be overridden by localStorage in the client
@@ -41,6 +41,16 @@ export default function TeacherConfigPage() {
           >
             <BookOpen className="w-4 h-4" />
             Activity
+          </Button>
+          {/* 新增：分配练习集按钮 */}
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => router.push("/teacher/assignments")}
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="w-4 h-4" />
+            Assign Practice Sets
           </Button>
         </div>
         
