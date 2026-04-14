@@ -78,7 +78,7 @@ export async function getSession(): Promise<IronSession<SessionData>> {
   const cookieStore = cookies();
   return getIronSession<SessionData>(cookieStore, sessionOptions);
 }
-
+export const sessionOptions = getSessionOptions();
 /**
  * Type guard to check if user is a teacher
  */
