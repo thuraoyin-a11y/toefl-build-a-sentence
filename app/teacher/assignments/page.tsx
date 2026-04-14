@@ -141,17 +141,42 @@ export default function AssignmentsPage() {
   };
 
   // 提交分配
-  const handleAssign = async () => {
-    if (selectedStudents.size === 0 || selectedPracticeSets.size === 0) {
-      setError("Please select at least one student and one practice set");
-      return;
+ const handleAssign = async () => {
+  if (selectedStudents.size === 0 || selectedPracticeSets.size === 0) {
+    setError("Please select at least one student and one practice set");
+    return;
+  }
+
+  setSubmitting(true);
+  setError("");
+
+  try {
+    const response = await fetch("/api/teacher/assignments/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentIds: Array.from(selectedStudents),
+        practiceSetIds: Array.from(selectedPracticeSets),
+        dueDate: dueDate?.toISOString(),
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to create assignments");
     }
 
-    setSubmitting(true);
-    setError("");
-
-    try {
-      const assignments = [];
+    const result = await response.json();
+    
+    // 显示成功消息或跳转
+    router.push("/teacher");
+    router.refresh();
+    
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Failed to create assignments");
+    setSubmitting(false);
+  }
+};
       
       // 为每个学生的每个练习集创建分配
       for (const studentId of selectedStudents) {
