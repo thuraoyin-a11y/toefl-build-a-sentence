@@ -15,6 +15,7 @@ interface UserState {
 interface UserActions {
   setUser: (user: User | null) => void;
   logout: () => void;
+  clearUser: () => void;  // ← 添加这一行
   fetchUser: () => Promise<void>;
 }
 
@@ -29,7 +30,10 @@ export const useUserStore = create<UserState & UserActions>((set) => ({
 
   // Actions
   setUser: (user) => set({ currentUser: user }),
+  
+  // 退出登录（两种叫法，功能相同）
   logout: () => set({ currentUser: null }),
+  clearUser: () => set({ currentUser: null }),  // ← 添加这一行
   
   // Fetch current user from API
   fetchUser: async () => {
