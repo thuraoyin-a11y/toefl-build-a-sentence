@@ -57,16 +57,18 @@ function getSessionSecret(): string {
 /**
  * Iron session configuration
  */
-export const sessionOptions = {
-  password: getSessionSecret(),
-  cookieName: "toefl_session",
-  cookieOptions: {
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-    sameSite: "lax" as const,
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  },
+export const getSessionOptions = () => {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("SESSION_SECRET environment variable is required");
+  }
+  return {
+    cookieName: "session",
+    password: secret,
+    cookieOptions: { secure: process.env.NODE_ENV === "production" }
+  };
 };
+
 
 /**
  * Get the current session from request cookies
