@@ -3,6 +3,7 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { SessionData, sessionOptions } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
+import { getAllPracticeSets } from "@/data/mock/practiceSets";
 
 /**
  * POST /api/teacher/practice-sets
@@ -226,7 +227,7 @@ export async function GET() {
       );
     }
 
-    const practiceSets = await prisma.practiceSet.findMany({
+    const dbPracticeSets = await prisma.practiceSet.findMany({
       where: { teacherId: session.teacherId },
       orderBy: { createdAt: "desc" },
       select: {
@@ -243,6 +244,21 @@ export async function GET() {
         },
       },
     });
+
+    // Include mock practice sets so teachers can assign them
+    const mockPracticeSets = getAllPracticeSets();
+
+    const practiceSets = [
+      ...dbPracticeSets,
+      ...mockPracticeSets.map((set) => ({
+        id: set.id,
+        title: set.title,
+        description: set.description,
+        difficulty: set.difficulty,
+        createdAt: null as Date | null,
+        topic: null as { id: string; name: string } | null,
+      })),
+    ];
 
     return NextResponse.json({ practiceSets });
   } catch (error) {
