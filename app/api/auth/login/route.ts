@@ -18,51 +18,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Demo 账户硬编码（临时方案）
-    const demoAccounts: Record<string, { password: string; userId: string; role: string; teacherId?: string; studentId?: string }> = {
-      'teacher@example.com': { 
-        password: 'password123', 
-        userId: 'user-teacher-001', 
-        role: 'TEACHER',
-        teacherId: 'teacher-001'
-      },
-      'alex@example.com': { 
-        password: 'password123', 
-        userId: 'user-alex-001', 
-        role: 'STUDENT',
-        studentId: 'student-alex-001'
-      },
-      'sam@example.com': { 
-        password: 'password123', 
-        userId: 'user-sam-001', 
-        role: 'STUDENT',
-        studentId: 'student-sam-001'
-      },
-    };
-
-    // 检查是否是 demo 账户
-    const demoUser = demoAccounts[email];
-    let user;
-
-    if (demoUser && password === demoUser.password) {
-      user = {
-        userId: demoUser.userId,
-        email: email,
-        role: demoUser.role,
-        teacherId: demoUser.teacherId,
-        studentId: demoUser.studentId,
-      };
-    } else {
-      // 非 demo 账户，走数据库验证
-      const authResult = await authenticateUser(email, password);
-      if (!authResult) {
-        return NextResponse.json(
-          { error: "Invalid email or password" },
-          { status: 401 }
-        );
-      }
-      user = authResult;
+    // 统一走数据库验证（authenticateUser 内部已支持 demo 账户密码校验）
+    const authResult = await authenticateUser(email, password);
+    if (!authResult) {
+      return NextResponse.json(
+        { error: "Invalid email or password" },
+        { status: 401 }
+      );
     }
+    const user = authResult;
 
     // 获取 session
     const cookieStore = cookies();
