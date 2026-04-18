@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { SessionData, sessionOptions, isTeacher, isStudent } from "@/lib/auth/session";
+import { SessionData, sessionOptions, isTeacher, isStudent, hasStaleSessionId } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 import { Question } from "@/lib/types";
 import { getPracticeSetById, getQuestionsForSet } from "@/data/mock/practiceSets";
@@ -25,6 +25,14 @@ export async function GET(
     if (!session.isLoggedIn) {
       return NextResponse.json(
         { error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    // Detect stale sessions with hardcoded demo IDs and force re-login
+    if (hasStaleSessionId(session)) {
+      return NextResponse.json(
+        { error: "Session expired. Please log in again." },
         { status: 401 }
       );
     }

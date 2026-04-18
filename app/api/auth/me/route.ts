@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { SessionData, sessionOptions } from "@/lib/auth/session";
+import { SessionData, sessionOptions, hasStaleSessionId } from "@/lib/auth/session";
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +12,14 @@ export async function GET() {
 
     if (!session.isLoggedIn) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    // Detect stale sessions with hardcoded demo IDs and force re-login
+    if (hasStaleSessionId(session)) {
+      return NextResponse.json(
+        { error: "Session expired. Please log in again." },
+        { status: 401 }
+      );
     }
 
     return NextResponse.json({

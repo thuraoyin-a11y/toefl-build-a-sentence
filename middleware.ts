@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { unsealData } from "iron-session";
-import { SessionData, sessionOptions } from "./lib/auth/session";
+import { SessionData, sessionOptions, hasStaleSessionId } from "./lib/auth/session";
 
 /**
  * Middleware for lightweight route protection
@@ -92,6 +92,13 @@ export async function middleware(request: NextRequest) {
   // Redirect non-teachers away from teacher routes
   if (isTeacherRoute && userRole !== "TEACHER") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+
+  // Detect stale sessions with hardcoded demo IDs and force re-login
+  if (session && hasStaleSessionId(session)) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    response.cookies.delete(sessionOptions.cookieName);
+    return response;
   }
 
   // Allow the request to proceed

@@ -1,19 +1,11 @@
-import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { PrismaClient, UserRole, AttemptType } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { questionBank, practiceSets } from "../data/mock/practiceSets";
-
-const adapter = new PrismaLibSql({
-  url: process.env.DATABASE_URL || "file:./dev.db",
-});
-
-let prisma: PrismaClient;
+import { prisma } from "../lib/prisma";
 
 async function main() {
   console.log("Start seeding...");
-  
-  // Initialize prisma client with adapter factory
-  prisma = new PrismaClient({ adapter })
+  console.log("Database URL:", (process.env.DATABASE_URL || "").substring(0, 50) + "...");
 
   // Clean up existing data (reverse dependency order)
   await prisma.practiceAttempt.deleteMany();

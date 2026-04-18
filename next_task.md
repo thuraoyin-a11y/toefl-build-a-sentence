@@ -55,6 +55,14 @@ All mock data and localStorage dependencies have been removed from the student-f
 3. **Server-Side Data Fetching**: Result pages fetch data server-side where possible
 4. **Error Handling**: Added proper error states for API failures
 
+## Completed Post-V2 Fixes
+
+### 2026-04-18 — BUG-003: Login Hardcoded Demo IDs
+- **File:** `app/api/auth/login/route.ts`
+- **Problem:** Hardcoded demo `studentId`/`teacherId` mismatched database UUIDs, causing practice set API to return 404.
+- **Fix:** Unified all login flows through `authenticateUser()` to ensure session IDs match database records.
+- **Verification:** Tested student login, assignment loading, practice page access, and retry flow. All pass.
+
 ## Future Work (Potential)
 
 No active task remains. The codebase is now in a clean V2 architecture state.

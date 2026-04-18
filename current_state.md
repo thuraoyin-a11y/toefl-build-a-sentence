@@ -78,7 +78,7 @@ Final closeout judgment: GO
 ### Student-Side
 - `/login` — Authentication
 - `/` (home) — Assigned practice sets with progress (API-based)
-- `/practice/[id]` — Practice session with questions from API
+- `/practice/[id]` — Practice session with questions from API (assignment authorization enforced)
 - `/result/[id]` — Results with score and feedback (API-based, no localStorage)
 - `/retry/[id]` — Retry wrong answers (API-based source attempt loading)
 - Assignment completion tracking
@@ -158,5 +158,8 @@ type SessionData =
 - alex@example.com / password123
 - sam@example.com / password123
 
+## Bug Fixes Since V2
+- **2026-04-18** — Fixed login hardcoded demo IDs (BUG-003). Demo accounts now receive real database UUIDs, resolving "Practice set not found" on student practice pages.
+
 ## Last Updated
-2026-04-09 — V2 Architecture complete (mock data removal)
+2026-04-18 — BUG-003 fixed (login hardcoded demo IDs)

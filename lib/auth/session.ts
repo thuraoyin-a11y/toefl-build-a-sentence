@@ -96,3 +96,27 @@ export function isStudent(
 ): session is SessionData & { isLoggedIn: true; role: "STUDENT"; studentId: string } {
   return session.isLoggedIn === true && session.role === "STUDENT";
 }
+
+/**
+ * UUID regex for validating database IDs
+ */
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Check if a session contains stale hardcoded demo IDs
+ * Legacy login route used IDs like "student-alex-001" instead of UUIDs.
+ * This helper detects those stale sessions so they can be cleared.
+ */
+export function hasStaleSessionId(session: SessionData): boolean {
+  if (!session.isLoggedIn) return false;
+
+  if (session.role === "STUDENT" && session.studentId) {
+    return !UUID_REGEX.test(session.studentId);
+  }
+
+  if (session.role === "TEACHER" && session.teacherId) {
+    return !UUID_REGEX.test(session.teacherId);
+  }
+
+  return false;
+}

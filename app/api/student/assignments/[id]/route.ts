@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { SessionData, sessionOptions, isStudent } from "@/lib/auth/session";
+import { SessionData, sessionOptions, isStudent, hasStaleSessionId } from "@/lib/auth/session";
 import { prisma } from "@/lib/prisma";
 
 /**
@@ -32,6 +32,14 @@ export async function GET(
       return NextResponse.json(
         { error: "Student access required" },
         { status: 403 }
+      );
+    }
+
+    // Detect stale sessions with hardcoded demo IDs and force re-login
+    if (hasStaleSessionId(session)) {
+      return NextResponse.json(
+        { error: "Session expired. Please log in again." },
+        { status: 401 }
       );
     }
 
